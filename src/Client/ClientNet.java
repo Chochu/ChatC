@@ -93,6 +93,7 @@ public class ClientNet {
 	}
 	
 	public int Connect(String uname, String passwd) {
+		
 		// connect to server if not yet connected
 		if ( ((ClientSocket == null) || (ClientSocket.isClosed())) && 
 				((ServerHandler == null) || (!ServerHandler.isAlive())) ) {
@@ -142,23 +143,26 @@ public class ClientNet {
 	// Server commands
 	public HashMap<Integer,String> GetChatRooms() {
 		ServerHandler.SendCommand(1,"GetServerRooms");
-		while(!Ready()) {
+		while(!ServerHandler.Info.containsKey("RET_STAT")) {
 			try {
 				Thread.sleep(1);
 			} catch (InterruptedException e) {e.printStackTrace();}
 		}
+		System.out.println("Done Wating --------------");
 		// check if correct data
-		if (!ServerHandler.Info.containsKey("RET_STAT"))
-			return null;
+//		if (!ServerHandler.Info.containsKey("RET_STAT"))
+//			return null;
 		String retstat = ServerHandler.Info.get("RET_STAT");
 		if (!retstat.split(":",2)[0].equals("GetServerRooms"))
 			return null;
 		// unserialize
+		System.out.println("Done Check*******************");
 		HashMap<Integer,String> rooms = new HashMap<Integer,String>();
 		retstat = retstat.split(":",2)[1];
 		for (String b : retstat.split(";")) {
 			rooms.put(Integer.parseInt(b.split(",",2)[0]), b.split(",",2)[1]);
 		}
+		System.out.println("Done unserialize ---------@@@@");
 		return rooms;
 	}
 	

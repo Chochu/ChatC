@@ -270,7 +270,7 @@ public class ChatTabPane extends JPanel implements ActionListener, MouseListener
 			//            }
 			//System.out.println(message_jEditorPane.getText());
 
-			//addStringtoChat(Message_EditorPane.getText().replaceAll("</*html>|</*head>|</*body>|\n|\r|<p style=\"margin-top: 0\">|</p>","").trim()); //add send to
+			addStringtoChat(Message_EditorPane.getText().replaceAll("</*html>|</*head>|</*body>|\n|\r|<p style=\"margin-top: 0\">|</p>","").trim()); //add send to
 			evt.consume();
 			String tosend = Message_EditorPane.getText().replaceAll("</*html>|</*head>|</*body>|\n|\r|<p style=\"margin-top: 0\">|</p>","").trim();
 			clientnet.Send(tosend,chatRoomid);

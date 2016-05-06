@@ -12,6 +12,7 @@ import java.awt.event.WindowEvent;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.Vector;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -32,14 +33,15 @@ public class ClientGUI{
 		initComponents();
 	}
 	void initRoomPane() throws InterruptedException{
+		
 		Tab = new javax.swing.JTabbedPane(); //tab, main pane (display room, etc)
 		Main_ScrollPane = new javax.swing.JScrollPane(); //
 		Room_Jlist = new javax.swing.JList<>();
 		
 		//HashMap<Integer, String> getSR = clientnet.GetChatRooms();//get open room from the server
 		getServerRoom = clientnet.GetChatRooms();
-		System.out.println(getServerRoom);
-		Thread.sleep(1);
+		//System.out.println(getServerRoom + "<-----");
+		//Thread.sleep(1);
 		//getServerRoom.put(0, "Room 1");
 		final String[] openRoom = new String[getServerRoom.size()];
 		int counter = 0;
@@ -68,7 +70,6 @@ public class ClientGUI{
         Tab.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 TabMouseClicked(evt);
-                
             }
         });
         
@@ -88,7 +89,9 @@ public class ClientGUI{
 		//				);
 		//
 		//		pack();
-
+		Runnable r = new ClientGuiListener(clientnet);
+		Thread th = new Thread(r);
+		th.start();
 	}
 
 	/**
@@ -130,6 +133,16 @@ public class ClientGUI{
 			int index = Tab.getSelectedIndex(); //get index
 			Tab.removeTabAt(index); //close tab at index
 			clientnet.LeaveChatRoom(getRoomIDbyName(Tab.getTitleAt(index))); //send to server to close tab with room name
+			int roomID = getRoomIDbyName(Tab.getTitleAt(index));
+			int roomdelete = -1;
+			for(int x = 0; x < CTPArr.size();x++){
+				if(CTPArr.get(x).chatRoomid == roomID){
+					roomdelete = x;
+				}
+			}
+			if(roomdelete != -1){
+				CTPArr.remove(roomdelete);
+			}
 		}
 	}
 
@@ -137,18 +150,16 @@ public class ClientGUI{
 		// Open a new tab
 		if(evt.getClickCount() == 2){
 			int index = Room_Jlist.locationToIndex(evt.getPoint());
-			
 			ListModel dlm = Room_Jlist.getModel();
 			Object item = dlm.getElementAt(index);;
 			Room_Jlist.ensureIndexIsVisible(index);
 			System.out.println(getRoomIDbyName(""+item));
+			
+			
 			ChatTabPane chattabpane = new ChatTabPane(clientnet,getRoomIDbyName(""+item));
 			Tab.addTab(""+item, chattabpane);
+			CTPArr.add(chattabpane);
 			clientnet.JoinChatRoom(getRoomIDbyName(""+item)); //send to server that the user has join the room name
-			
-			Runnable r = new ClientGuiListener(chattabpane,clientnet);
-			Thread th = new Thread(r);
-			th.start();
 			/*
 			 * create thread and listen to port
 			 */
@@ -200,19 +211,36 @@ public class ClientGUI{
 		ClientGUI client = new ClientGUI();
 //		client.initRoomPane();
 		Runnable r = new LoginThread(client,clientnet);
-		Thread th = new Thread(r);
+		th = new Thread(r);
 		th.start();
-//		if(!th.isAlive()){
-//			client.initRoomPane();
-//		}
+		
+		while(true){
+			if(!th.isAlive()){
+				try {
+					System.out.println("Thread is DEAD!");
+					client.initRoomPane();
+					System.out.println("Finish Init rOOM!");
+					break;
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+			
 		//		/* Create and display the form */
-		//		java.awt.EventQueue.invokeLater(new Runnable() {
-		//			public void run() {
-		//				
-		////				client.setVisible(true);
-		////				client.setSize(800,600);
-		//			}
-		//		});
+//				java.awt.EventQueue.invokeLater(new Runnable() {
+//					public void run() {
+//	
+//					}
+//				});
 	}
 
 	// Variables declaration - do not modify   
@@ -220,11 +248,13 @@ public class ClientGUI{
 	CardLayout cl;
 	JPanel panelCont;
 	LoginPane loginPane;
+	protected static Thread th;
 	private JFrame frame;
 	private javax.swing.JScrollPane Main_ScrollPane;
 	private javax.swing.JList<String> Room_Jlist;
-	private javax.swing.JTabbedPane Tab;
+	protected javax.swing.JTabbedPane Tab;
 	private static ClientNet clientnet;
+	protected static Vector<ChatTabPane> CTPArr =  new Vector<ChatTabPane>();
 	// End of variables declaration                   
 
 }
