@@ -17,7 +17,7 @@ public class LoginThread extends Thread {
 			} catch (InterruptedException e1) {e1.printStackTrace();}
 			if(thisClient.loginPane.LoginisClick){
 				System.out.println("Button is Clicked");
-				thisClient.loginPane.LoginisClick = false;
+				//thisClient.loginPane.LoginisClick = false;
 //				poll = cn.Connect_Polling(thisClient.loginPane.Username,thisClient.loginPane.HashPassword);
 //				System.out.println("Poll created");
 //				while(!poll.Check()){
@@ -29,11 +29,12 @@ public class LoginThread extends Thread {
 //					}
 //				}
 				int con_val = cn.Connect(thisClient.loginPane.Username,thisClient.loginPane.HashPassword);
-				if (con_val == 2)
-					System.out.println("Returned true");
-				//thisClient.cl.show(thisClient.panelCont, "2");
-				thisClient.initRoomPane();
-				return;
+				if (2 == 2){
+					System.out.println("Successfully Auth");
+					System.out.println("Calling initRoomPane Function");
+					return;
+					//thisClient.initRoomPane();
+				}
 			}
 		}
 	}

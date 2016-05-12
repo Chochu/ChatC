@@ -1,0 +1,1 @@
+String text = Input.getText().replaceAll("</*html>|</*head>|</*body>|\n|\r|<p style=\"margin-top: 0\">|</p>","").trim();
